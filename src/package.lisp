@@ -41,7 +41,7 @@
                        ;; #:simple-layout
                        ;; #:pattern-layout
 
-                       ;;  
+                       ;;
                        ;; #:clear-logging-configuration
                        ;; #:reset-logging-configuration
 
@@ -75,7 +75,7 @@
                        ;; #:package-wrapper
                        ;; #:map-logger-children
                        ;; #:map-logger-descendants
-                       ;; #:start-hierarchy-watcher-thread 
+                       ;; #:start-hierarchy-watcher-thread
                        ;; #:stop-hierarchy-watcher-thread
                        ;; #:add-watch-token
                        ;; #:remove-watch-token
@@ -112,13 +112,13 @@
                        ;; one letter logging macro forwarders
                        #:f #:e #:w #:i #:d #:d1 #:d2 #:d3 #:d4
                        #:t #:d5 #:d6 #:d7 #:d8 #:d9 #:c #:s))
-                  
+
                   (:export
                    #:f #:e #:w #:i #:d #:d1 #:d2 #:d3 #:d4 #:t #:d5 #:d6 #:d7 #:d8 #:d9 #:c #:s)))))
   (log4cl-defpackage))
 
-(defmacro forward-macro (name from-name &optional depreciate replacement)
-  (if depreciate 
+(defmacro forward-macro (name from-name &optional deprecate replacement)
+  (if deprecate
       (let ((replacement
               ;; we want stuff to print as LOG4CL:SOMETHING rather
               ;; then LOG4CL-IMPL:SOMETHING but can't change package
@@ -129,15 +129,15 @@
                         (eq *package* (symbol-package replacement)))
                    (format nil "~A:~A" '#:log4cl replacement))
                   ((and (consp replacement)
-                        (endp (cddr replacement))) 
+                        (endp (cddr replacement)))
                    (format nil "~A:~A" (first replacement) (second replacement)))
-                  (t 
-                   (format nil "~S" replacement)))))) 
+                  (t
+                   (format nil "~S" replacement))))))
         `(progn
            (setf (documentation ',name 'function) (documentation ',from-name 'function))
            (setf (macro-function ',name)
                  (lambda (&rest args)
-                   (log4cl-style-warning "Macro ~S is depreciated~^. Use ~A instead" ',name
+                   (log4cl-style-warning "Macro ~S is deprecated~^. Use ~A instead" ',name
                                          ,@(when replacement `(',replacement)))
                    (apply (macro-function ',from-name) args)))))
       `(progn
@@ -156,7 +156,7 @@
                 as forward-name = (or (find-symbol (format nil "~A-~A"
                                                            (string '#:log)
                                                            (string level))
-                                                   :log4cl) 
+                                                   :log4cl)
                                       (error "Unable to find logging macro for ~S" level))
                 collect `(forward-macro ,macro-name ,forward-name))))
     `(progn
@@ -175,21 +175,21 @@
                 as sexp-forward-name = (or (find-symbol (format nil "~A-~A"
                                                                 (string'#:log-sexp)
                                                                 (string level))
-                                                        :log4cl) 
+                                                        :log4cl)
                                            (error "Unable to find logging macro for ~S" level))
                 collect `(forward-macro ,sexp-macro-name ,sexp-forward-name t ,macro-name))))
     `(progn
        ,@defs)))
 
-(forward-levels #.+log-level-macro-symbols+) 
-(forward-sexp-levels #.+log-level-macro-symbols+) 
-(forward-macro log:sexp log4cl:log-sexp) 
+(forward-levels #.+log-level-macro-symbols+)
+(forward-sexp-levels #.+log-level-macro-symbols+)
+(forward-macro log:sexp log4cl:log-sexp)
 
 ;; make (log:expr) same as (log:sexp) and (log:make) shortcut for (log:make-logger)
 (forward-macro log:expr log4cl:log-sexp)
 
-(forward-macro log:category log4cl:make-logger) 
-(forward-macro log:make log4cl:make-logger t log:category) 
+(forward-macro log:category log4cl:make-logger)
+(forward-macro log:make log4cl:make-logger t log:category)
 
 ;; one letter logging macros
 (forward-macro log:f log4cl:log-fatal)
@@ -217,12 +217,10 @@
 (forward-function log:pop restore)
 (forward-function log:push save)
 
-;; depreciated forwards
+;; deprecated forwards
 (forward-macro log:with-hierarchy log4cl:with-log-hierarchy t log4cl:with-log-hierarchy)
 (forward-macro log:with-package-hierarchy log4cl:with-package-log-hierarchy t log4cl:with-package-log-hierarchy)
 (forward-macro log:in-hierarchy log4cl:in-log-hierarchy t log4cl:in-log-hierarchy)
 (forward-macro log:in-package-hierarchy log4cl:in-package-log-hierarchy t log4cl:in-package-log-hierarchy)
 
 (forward-macro log4cl:with-ndc-context log4cl:with-ndc t log4cl:with-ndc)
-
-

@@ -20,14 +20,14 @@
 ;;;
 ;;; So any code that uses self-logging to log4cl:self logger, needs to
 ;;; be in the files that are later in the system definition file
-;;; 
+;;;
 (in-package #:log4cl)
 
 ;;
 ;; These needs to be in separate file from the their definitions. I'm
 ;; actually unable to see SBCL generating code any differently with
 ;; these present, maybe even with speed 3 safety 0
-;; 
+;;
 #+sbcl
 (declaim (sb-ext:always-bound
           *log-indent*
@@ -41,7 +41,7 @@
 (declaim (special *root-logger*)
          (type logger *root-logger*)
 	 (type fixnum *log-indent*)
-         (inline is-enabled-for current-state 
+         (inline is-enabled-for current-state
                  log-level-to-string
                  log-level-to-lc-string
                  log-event-time))
@@ -64,7 +64,7 @@
 ;; Actual logger object
 (defstruct (logger (:constructor create-logger)
                    (:conc-name %logger-)
-                   (:print-function 
+                   (:print-function
                     (lambda  (logger stream depth)
                       (declare (ignore depth))
                       (print-unreadable-object (logger stream :identity t)
@@ -112,7 +112,7 @@
 (defstruct (source-file-logger
             (:constructor create-source-file-logger)
             (:include logger)
-            (:print-function 
+            (:print-function
              (lambda  (logger stream depth)
                (declare (ignore depth))
                (print-unreadable-object (logger stream :type t :identity t)
@@ -123,7 +123,7 @@
 (defstruct (file-logger
             (:constructor create-file-logger)
             (:include logger)
-            (:print-function 
+            (:print-function
                     (lambda  (logger stream depth)
                       (declare (ignore depth))
                       (print-unreadable-object (logger stream :type t :identity t)
@@ -187,8 +187,8 @@ value of *PACKAGE* "
 from parent"
   (declare (type logger logger))
   (let ((file-logger (when (typep logger 'file-logger)
-                       (file-logger-file logger)))) 
-    (labels ((%effective-log-level (lgr) 
+                       (file-logger-file logger))))
+    (labels ((%effective-log-level (lgr)
              (if (null lgr) +log-level-off+
                  (let* ((state (current-state lgr))
                         (level (logger-state-level state)))
@@ -206,7 +206,7 @@ from parent"
                         (file-logger-file logger))))
     (if (and file-logger (logger-first-after-package-p logger))
         (effective-log-level file-logger)
-        (unless (eq logger *root-logger*) 
+        (unless (eq logger *root-logger*)
           (effective-log-level (%logger-parent logger))))))
 
 (defun have-appenders-for-level (logger level)
@@ -242,7 +242,7 @@ descendants)"
       (maphash (lambda (name logger)
                  (declare (ignore name))
                  (funcall function logger)
-                 (unless (typep logger 'source-file-logger) 
+                 (unless (typep logger 'source-file-logger)
                    (map-logger-descendants function logger)))
                child-hash))))
 
@@ -334,7 +334,7 @@ which is a special type of leaf logger representing the source file."
              (ensure-source-logger (parent)
                (when (and file (>= (logger-depth parent) (or pkg-idx-end 0)))
                  (or source-file-logger
-                     (setq source-file-logger 
+                     (setq source-file-logger
                            (%get-logger
                             (append (subseq (coerce names 'list)
                                             (or pkg-idx-start 0)
@@ -351,13 +351,13 @@ which is a special type of leaf logger representing the source file."
                       (flags
                         (make-logger-flags
                          (1+ parent-depth)
-                         (if (and pkg-idx-start (<= pkg-idx-end (1+ parent-depth))) 
+                         (if (and pkg-idx-start (<= pkg-idx-end (1+ parent-depth)))
                              (1+ pkg-idx-start))
-                         (if (and pkg-idx-start  
-                                  (<= pkg-idx-end (1+ parent-depth))) 
+                         (if (and pkg-idx-start
+                                  (<= pkg-idx-end (1+ parent-depth)))
                              (1+ pkg-idx-end))))
-                      (logger 
-                        (if (and is-file-p (null categories)) 
+                      (logger
+                        (if (and is-file-p (null categories))
                             (create-source-file-logger
                              :category category
                              :category-separator (coerce cat-sep 'simple-string)
@@ -376,14 +376,14 @@ which is a special type of leaf logger representing the source file."
                  (when (and (not is-file-p)
                             source-file-logger)
                    (setf
-                    (gethash logger 
+                    (gethash logger
                              (or (%logger-child-hash source-file-logger)
                                  (setf (%logger-child-hash source-file-logger)
                                        (make-hash-table :test #'equal))))
                     logger))
                  (dotimes (*hierarchy* *hierarchy-max*)
                    (adjust-logger logger))
-                 logger))) 
+                 logger)))
       (do ((logger *root-logger*))
           ((null categories) logger)
         (let* ((cat (pop categories))
@@ -395,7 +395,7 @@ which is a special type of leaf logger representing the source file."
                                       (not (position #\: cat-sep)))
                              (write-char #\: s))
                            (write-string-modify-case
-                            (coerce 
+                            (coerce
                              (typecase cat
                                (string cat)
                                (symbol (symbol-name cat))
@@ -427,9 +427,9 @@ which is a special type of leaf logger representing the source file."
                                    (or
                                     ;; leaf, but not part of the package name
                                     (and (null categories)
-                                         (> (logger-depth cached) 
-                                            (or pkg-idx-end 0))) 
-                                    ;; parent is not part of package name 
+                                         (> (logger-depth cached)
+                                            (or pkg-idx-end 0)))
+                                    ;; parent is not part of package name
                                     (> (logger-depth logger)
                                        (or pkg-idx-end 0))))
                           ;; Check if logger source file had changed
@@ -465,7 +465,7 @@ which is a special type of leaf logger representing the source file."
                                              (logger-pkg-idx-start cached))
                                          (/= (1+ pkg-idx-end)
                                              (logger-pkg-idx-end cached))))
-                            (setf (%logger-depth cached) 
+                            (setf (%logger-depth cached)
                                   (make-logger-flags (logger-depth cached)
                                                      (1+ pkg-idx-start) (1+ pkg-idx-end)))))
                         cached))
@@ -495,7 +495,7 @@ context of the current application."
   "Returns a FORM that is used as an expansion of log-nnnnn macros"
   (declare (type fixnum level)
 	   (type list args))
-  (with-package-naming-configuration (*package*) 
+  (with-package-naming-configuration (*package*)
     (multiple-value-bind (logger-form args)
         (resolve-logger-form *package* env args)
       (let* ((logger-symbol (gensym "logger"))
@@ -505,19 +505,19 @@ context of the current application."
                              (let ((logger (eval logger-form)))
                                (when (typep logger 'logger)
                                  logger))))
-             (check-type (unless const-logger 
+             (check-type (unless const-logger
                            `(or (typep ,logger-symbol 'logger)
                                 (error 'type-error :expected-type 'logger
                                                    :datum ,logger-symbol))))
              (pkg-hint
-               (let ((sym (intern (symbol-name package-ref-sym) *package*))) 
+               (let ((sym (intern (symbol-name package-ref-sym) *package*)))
                  (when sym `(symbol-package ',sym)))))
-        (if args 
+        (if args
             `(let ((,logger-symbol ,logger-form))
                #+sbcl(declare (sb-ext:muffle-conditions sb-ext:compiler-note))
                (when (locally (declare (optimize (safety 0) (debug 0) (speed 3)))
                        ,@(when check-type (list check-type))
-                       (is-enabled-for ,logger-symbol ,level)) 
+                       (is-enabled-for ,logger-symbol ,level))
                  (flet ((,log-stmt (,stream)
                           (declare (type stream ,stream))
                           (format ,stream ,@args)))
@@ -558,7 +558,7 @@ context of the current application."
                          for error-cnt fixnum from 0
                          do (block nil
                               (handler-bind
-                                  ((error 
+                                  ((error
                                      (lambda (e)
                                        ;; if error is inside the actual user log statement
                                        ;; fall through, to invoke the debugger or such.
@@ -607,7 +607,7 @@ context of the current application."
   "Return a list of LOGGER's descendants.
 
 NOSELFP if T filters out Log4CL self-logger from descendants"
-  (labels ((%logger-descendants (logger) 
+  (labels ((%logger-descendants (logger)
              (let ((children (logger-children logger)))
                (when (and noselfp (eq logger *root-logger*))
                  (setq children (delete +self-logger+ children)))
@@ -756,18 +756,18 @@ will be called if appender was removed"
 
 (defun logger-name (logger)
   "Return the name of the logger category itself (without parent loggers)"
-  (if (%logger-parent logger) 
+  (if (%logger-parent logger)
       (substr (%logger-category logger)
               (%logger-name-start-pos logger))
       "ROOT"))
 
 (defun logger-file-logger (logger)
-  "Return source file path-name where logger was instantiated"
+  "Return source file pathname where logger was instantiated"
   (when (typep logger 'file-logger)
     (file-logger-file logger)))
 
 (defun logger-file (logger)
-  "Return source file path-name where logger was instantiated"
+  "Return source file pathname where logger was instantiated"
   (cond ((and (typep logger 'file-logger)
               (setq logger (file-logger-file logger)))
          (source-file-logger-file logger))
@@ -818,12 +818,12 @@ consed list of strings"
     root))
 
 (eval-when (:compile-toplevel)
-  (when (boundp '*root-logger*) 
+  (when (boundp '*root-logger*)
     (unless (ignore-errors
              (typep *root-logger* 'root-logger))
       ;; loading over old version, re-create the root logger
       (makunbound '*root-logger*)
-      (makunbound '+self-logger+) 
+      (makunbound '+self-logger+)
       (makunbound '+self-meta-logger+))))
 
 (defvar *root-logger*
@@ -835,7 +835,7 @@ consed list of strings"
 compiled file"
   (declare (ignore env))
   (let ((pkg-start (logger-pkg-idx-start logger))
-        (pkg-end (logger-pkg-idx-end logger))) 
+        (pkg-end (logger-pkg-idx-end logger)))
     `(%get-logger ',(logger-categories logger)
                   ,(%logger-category-separator logger)
                   nil nil t
@@ -858,6 +858,3 @@ then disable the appender"
   (let ((*inside-user-log-function* t))
     (funcall log-func stream)
     (values)))
-
-
-
