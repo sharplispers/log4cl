@@ -20,7 +20,9 @@
 
 (defsystem :log4cl
   :version "1.1.2"
-  :depends-on (:bordeaux-threads #+sbcl :sb-posix)
+  :depends-on (:bordeaux-threads
+               :bt-semaphore
+               #+sbcl :sb-posix)
   :components
   ((module "src" :serial t
                  :components ((:file "impl-package")
