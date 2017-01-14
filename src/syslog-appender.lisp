@@ -16,10 +16,14 @@
 (in-package #:log4cl)
 
 (defclass syslog-appender (appender)
-  ((name :initarg :name :type string)
-   (include-pid? :initarg :include-pid? :type boolean))
+  ((name :initarg :name :type string
+         :accessor syslog-appender-name)
+   (include-pid? :initarg :include-pid? :type boolean
+                 :accessor syslog-appender-include-pid?))
   (:default-initargs
-   :layout (make-instance 'pattern-layout :conversion-pattern "%m"))
+   :layout (make-instance 'pattern-layout :conversion-pattern "%m")
+   :name (lisp-implementation-type)
+   :include-pid? t)
   (:documentation
    "An appender that writes log messages to the syslog.
 
@@ -32,19 +36,6 @@ The :include-pid? initarg controls whether log entries produced by the
 syslog connection should include the process id (PID). The default is
 true."))
 
-(defmethod shared-initialize :after ((instance   syslog-appender)
-                                     (slot-names t)
-                                     &key
-                                     (name         (lisp-implementation-type))
-                                     (include-pid? t))
-  (sb-posix:openlog name (logior sb-posix:log-user
-                                 (if include-pid? sb-posix:log-pid 0))))
-
-(defmethod reinitialize-instance :before ((instance syslog-appender) &key)
-  (sb-posix:closelog))
-
-(defmethod close-appender ((appender syslog-appender))
-  (sb-posix:closelog))
 
 (defmethod appender-do-append ((appender syslog-appender) logger level log-func)
   (let* ((syslog-level (%log4cl-level->syslog-level level))
@@ -52,7 +43,9 @@ true."))
          (message
            (with-output-to-string (stream)
              (layout-to-stream layout stream logger level log-func))))
-    (sb-posix:syslog syslog-level "~A" message)))
+    (cl-syslog:log (syslog-appender-name appender) :user syslog-level message
+                   (if (syslog-appender-include-pid? appender)
+                       cl-syslog:+log-pid+ 0))))
 
 (defmethod property-alist ((instance syslog-appender))
   (append (call-next-method)
@@ -64,9 +57,9 @@ true."))
 (defun %log4cl-level->syslog-level (level)
   (let ((level/keyword (aref +log-level-to-keyword+ level)))
     (ecase level/keyword
-      (:fatal sb-posix:log-crit)
-      (:error sb-posix:log-err)
-      (:warn  sb-posix:log-warning)
-      (:info  sb-posix:log-info)
+      (:fatal :crit)
+      (:error :err)
+      (:warn  :warning)
+      (:info  :info)
       ((:debu1 :debu2 :debu3 :debu4 :debu5 :debu6 :debu7 :debu8 :debu9)
-       sb-posix:log-debug))))
+       :debug))))

@@ -199,7 +199,7 @@
                     #:with-package-naming-configuration
                     #:fix-method-spec-list
                     #:tricky-console-appender
-                    #+sbcl #:syslog-appender))
+                    #:syslog-appender))
                 ;; avoid SBCL (also exports) error
                 (removed-exports
                   (set-difference old-exports

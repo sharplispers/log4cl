@@ -22,6 +22,7 @@
   :version "1.1.3"
   :depends-on (:bordeaux-threads
                :bt-semaphore
+               :cl-syslog
                #+sbcl :sb-posix)
   :components
   ((module "src" :serial t
@@ -40,8 +41,7 @@
                               (:file "simple-layout")
                               (:file "pattern-layout")
                               (:file "appender")
-                              (:file "syslog-appender-sbcl"
-                               :if-feature :sbcl)
+                              (:file "syslog-appender")
                               (:file "watcher")
                               (:file "configurator")
                               (:file "property-parser")

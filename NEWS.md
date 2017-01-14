@@ -1,9 +1,12 @@
-## 1.1.3 - Syslog Appender
+## 1.1.3 - Resuscitation
 
-* For SBCL, a syslog appender using sb-posix:syslog has been added.
+* A syslog appender using cl-syslog has been added.
 
-* Other implementations may be supported once cl-syslog becomes
-  available with the next Quicklisp release.
+* Fix for ABCL has been applied.
+
+* Various fixes for Log4Slime.
+
+* Fix problem with join-thread-error.
 
 ## 1.1.2 - Bugfixes
 
