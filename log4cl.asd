@@ -46,7 +46,7 @@
                               (:file "property-configurator")
                               (:file "package")))))
 
-(defsystem :log4cl-test
+(defsystem :log4cl/test
   :version "1.1.2"
   :depends-on (:log4cl :stefil)
   :components ((:module "tests"
@@ -63,7 +63,7 @@
                              (:file "test-regressions")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :log4cl))))
-  (operate 'load-op :log4cl-test)
+  (operate 'load-op :log4cl/test)
   (let ((*package* (find-package :log4cl-test)))
     (eval (read-from-string "(stefil:funcall-test-with-feedback-message 'log4cl-test::test)")))
   (values))
@@ -76,7 +76,3 @@
       (when foo
         (funcall foo))))
   (values))
-
-
-
-
