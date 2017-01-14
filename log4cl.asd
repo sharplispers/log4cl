@@ -19,7 +19,7 @@
 (in-package :log4cl.system)
 
 (defsystem :log4cl
-  :version "1.1.2"
+  :version "1.1.3"
   :depends-on (:bordeaux-threads
                :bt-semaphore
                #+sbcl :sb-posix)
@@ -40,6 +40,8 @@
                               (:file "simple-layout")
                               (:file "pattern-layout")
                               (:file "appender")
+                              (:file "syslog-appender-sbcl"
+                               :if-feature :sbcl)
                               (:file "watcher")
                               (:file "configurator")
                               (:file "property-parser")
@@ -47,7 +49,7 @@
                               (:file "package")))))
 
 (defsystem :log4cl/test
-  :version "1.1.2"
+  :version "1.1.3"
   :depends-on (:log4cl :stefil)
   :components ((:module "tests"
                 :serial t
