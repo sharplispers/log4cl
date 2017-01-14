@@ -18,17 +18,10 @@
 
 (in-package :log4cl.system)
 
-#+abcl
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (ignore-errors
-    (mapc #'require '(abcl-contrib jna))
-    (pushnew :abcl-jna *features*)))
-
 (defsystem :log4cl
   :version "1.1.3"
   :depends-on (:bordeaux-threads
                :bt-semaphore
-               #-(and abcl (not abcl-jna)) :cl-syslog
                #+sbcl :sb-posix)
   :components
   ((module "src" :serial t
@@ -47,12 +40,21 @@
                               (:file "simple-layout")
                               (:file "pattern-layout")
                               (:file "appender")
-                              #-(and abcl (not abcl-jna)) (:file "syslog-appender")
                               (:file "watcher")
                               (:file "configurator")
                               (:file "property-parser")
                               (:file "property-configurator")
                               (:file "package")))))
+
+(defsystem :log4cl/syslog
+  :version "1.1.3"
+  :depends-on (:log4cl
+               #-sbcl :cl-syslog)
+  :components ((:module "src"
+                :serial t
+                :components ((:file "syslog-appender")
+                             #+sbcl (:file "syslog-appender-sbcl")
+                             #-sbcl (:file "syslog-appender-cffi")))))
 
 (defsystem :log4cl/test
   :version "1.1.3"
