@@ -80,6 +80,8 @@ will be: package.foo.bar.baz
                                        (symbol-name debug-name)))))
         debug-name)
       (cond 
+        ((atom debug-name)
+         (string debug-name))
         ((member (first debug-name) '(flet labels lambda))
          (include-block-debug-name? (second debug-name)))
         ((eq 'labels (first debug-name))
