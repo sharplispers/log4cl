@@ -49,10 +49,12 @@
   `(call-with-logged-problems ',context (lambda () ,@body)))
 
 #-ecl (defvar *stop-cv* (bt:make-condition-variable :name "Log4CL stop condition variable"))
+#-ecl (defvar *stop-watcher* nil)
 (defvar *stop-lock* (bt:make-lock "Log4CL stop lock"))
 
 (defun start-hierarchy-watcher-thread ()
   (unless *watcher-thread*
+    #-ecl (setf *stop-watcher* nil)
     #+ecl (bt:acquire-lock *stop-lock*)
     (let ((logger (make-logger '(log4cl))))
       (bordeaux-threads:make-thread
@@ -76,7 +78,8 @@
                                #-ecl ; timeout on cv signals error in ECL 16.1.3
                                (bt:with-lock-held (*stop-lock*)
                                  (bt:condition-wait *stop-cv* *stop-lock*
-                                                    :timeout *hierarchy-watcher-heartbeat*))
+                                                    :timeout *hierarchy-watcher-heartbeat*)
+                                 *stop-watcher*)
                                #+ecl
                                (handler-case
                                    (bt:with-timeout (*hierarchy-watcher-heartbeat*)
@@ -121,6 +124,7 @@
     (when thread
       (with-logged-problems '(stop-hierarchy-watcher-thread :stop-thread)
         #-ecl (bt:with-lock-held (*stop-lock*)
+                (setf *stop-watcher* t)
                 (bt:condition-notify *stop-cv*))
         #+ecl (bt:release-lock *stop-lock*))
       (with-logged-problems '(stop-hierarchy-watcher-thread :join-thread)
