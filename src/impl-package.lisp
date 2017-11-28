@@ -209,7 +209,7 @@
                 (defpackage-form
                   `(defpackage #:log4cl-impl
                      (:nicknames #:log4cl)
-                     (:use #:cl #:bordeaux-threads)
+                     (:use #:cl)
                      (:export ,@new-exports))))
            (when (and p2 removed-exports)
              (unexport removed-exports p2))
