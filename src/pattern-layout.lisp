@@ -1127,7 +1127,7 @@ strftime like PATTERN."))
 (define-pattern-formatter (#\t)
   "Output %t (thread name) pattern"
   (declare (ignore logger log-level log-func))
-  (format-string (or (thread-name (current-thread)) "") stream fmt-info))
+  (format-string (or (bt:thread-name (bt:current-thread)) "") stream fmt-info))
 
 (define-pattern-formatter (#\x)
   (declare (ignore logger log-level log-func))

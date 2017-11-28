@@ -25,7 +25,7 @@ appenders")
 indexed by this variable. Can be assigned directly or ")
 
 (defvar *hierarchy-lock*
-  (make-recursive-lock "hierarchy-lock")
+  (bt:make-recursive-lock "Log4CL global configuration lock")
   "Global lock for changing logging configuration")
 
 (defvar *hierarchy-watcher-heartbeat* 1
@@ -49,7 +49,7 @@ WATCHER-HOOK of each hierarchy")
    ;; Used for auto-reloading the modified files in
    ;; PROPERTY-CONFIGURATOR but can be used for other stuff.
    (watch-tokens :initform nil :accessor watch-tokens)
-   (%lock :initform (make-recursive-lock))))
+   (%lock :initform (bt:make-recursive-lock "Log4CL hierarchy lock"))))
 
 (defvar *hierarchies*
   (make-array 1 :adjustable t :fill-pointer t

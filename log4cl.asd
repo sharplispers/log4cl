@@ -21,7 +21,6 @@
 (defsystem :log4cl
   :version "1.1.3"
   :depends-on (:bordeaux-threads
-               :bt-semaphore
                #+sbcl :sb-posix)
   :components
   ((module "src" :serial t

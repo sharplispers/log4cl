@@ -48,10 +48,14 @@
 (defmacro with-logged-problems (context &body body)
   `(call-with-logged-problems ',context (lambda () ,@body)))
 
-(defvar *stop-semaphore* (bt-sem:make-semaphore :name "stop-log4cl"))
+#-ecl (defvar *stop-cv* (bt:make-condition-variable :name "Log4CL stop condition variable"))
+#-ecl (defvar *stop-watcher* nil)
+(defvar *stop-lock* (bt:make-lock "Log4CL stop lock"))
 
 (defun start-hierarchy-watcher-thread ()
   (unless *watcher-thread*
+    #-ecl (setf *stop-watcher* nil)
+    #+ecl (bt:acquire-lock *stop-lock*)
     (let ((logger (make-logger '(log4cl))))
       (bordeaux-threads:make-thread
        (lambda ()
@@ -69,11 +73,22 @@
                         (progn
                           (log-info :logger logger "Hierarchy watcher started")
                           (loop for *watcher-event-time* = (get-universal-time)
-                                do (hierarchy-watcher-once)
-                                until (bt-sem:wait-on-semaphore *stop-semaphore* :timeout *hierarchy-watcher-heartbeat*)))
+                             do (hierarchy-watcher-once)
+                             until
+                               #-ecl ; timeout on cv signals error in ECL 16.1.3
+                               (bt:with-lock-held (*stop-lock*)
+                                 (bt:condition-wait *stop-cv* *stop-lock*
+                                                    :timeout *hierarchy-watcher-heartbeat*)
+                                 *stop-watcher*)
+                               #+ecl
+                               (handler-case
+                                   (bt:with-timeout (*hierarchy-watcher-heartbeat*)
+                                     (bt:acquire-lock *stop-lock*))
+                                 (serious-condition () nil))))
                       (error (e)
                         (log-error :logger logger "Error in hierarchy watcher thread:~%~A" e))))
                (with-hierarchies-lock
+                 #+ecl (bt:release-lock *stop-lock*)
                  (setf *watcher-thread* nil))
                (%with-local-interrupts (log-info :logger logger "Hierarchy watcher thread ended"))))))
        :name "Hierarchy Watcher"
@@ -107,8 +122,11 @@
 (defun stop-hierarchy-watcher-thread ()
   (let ((thread (with-hierarchies-lock *watcher-thread*)))
     (when thread
-      (with-logged-problems '(stop-hierarchy-watcher-thread :destroy-thread)
-        (bt-sem:signal-semaphore *stop-semaphore*))
+      (with-logged-problems '(stop-hierarchy-watcher-thread :stop-thread)
+        #-ecl (bt:with-lock-held (*stop-lock*)
+                (setf *stop-watcher* t)
+                (bt:condition-notify *stop-cv*))
+        #+ecl (bt:release-lock *stop-lock*))
       (with-logged-problems '(stop-hierarchy-watcher-thread :join-thread)
         (bt:join-thread thread)))))
 

@@ -35,12 +35,12 @@
   (aref *hierarchies* *hierarchy*))
 
 (defmacro with-hierarchies-lock (&body body)
-  `(with-recursive-lock-held (*hierarchy-lock*)
+  `(bt:with-recursive-lock-held (*hierarchy-lock*)
      ,@body))
 
 (defmacro with-hierarchy-lock ((&optional (hierarchy (current-hierarchy)))
                                &body body)
-  `(with-recursive-lock-held ((slot-value ,hierarchy '%lock))
+  `(bt:with-recursive-lock-held ((slot-value ,hierarchy '%lock))
      ,@body))
 
 

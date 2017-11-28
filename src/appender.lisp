@@ -61,7 +61,7 @@ APPENDER-DO-APPEND was called, and writes its output to null sink"))
 appender if it encounters an error matching ERROR-TYPE"))
 
 (defclass serialized-appender (appender)
-  ((%lock :initform (make-lock)))
+  ((%lock :initform (bt:make-recursive-lock "Log4CL serialized appender lock")))
   (:documentation "Appender that serializes itself using a lock"))
 
 (defclass stream-appender (serialized-appender)
@@ -193,7 +193,7 @@ unless IMMEDAITE-FLUSH property is set."
           ;; flush then.
           (when (> (+ since-last-flush *hierarchy-watcher-heartbeat*)
                    flush-interval)
-            (with-lock-held (%lock)
+            (bt:with-recursive-lock-held (%lock)
               (setf %last-flush-time    time
                     %output-since-flush nil)
               (finish-output (appender-stream appender)))))))))
@@ -224,7 +224,7 @@ been any output. TIME will be used to mark the time of the flush"
       appender
     (when (and (not immediate-flush)
                %output-since-flush)
-      (with-lock-held (%lock)
+      (bt:with-recursive-lock-held (%lock)
         (setf %last-flush-time    time
               %output-since-flush nil)
         (finish-output (appender-stream appender))))))
@@ -248,7 +248,7 @@ time of the flush with TIME"
 (defmethod appender-do-append :around
     ((this serialized-appender) logger level log-func)
   (declare (ignore logger level log-func))
-  (with-lock-held ((slot-value this '%lock))
+  (bt:with-recursive-lock-held ((slot-value this '%lock))
     (call-next-method)))
 
 (defmethod appender-do-append ((this stream-appender) logger level log-func)
