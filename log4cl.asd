@@ -43,7 +43,17 @@
                               (:file "configurator")
                               (:file "property-parser")
                               (:file "property-configurator")
-                              (:file "package")))))
+                              (:file "package"))))
+  :in-order-to ((test-op (test-op :log4cl/test))))
+
+(defmethod perform :after ((op load-op) (system (eql (find-system :log4cl))))
+  (when (find-package :log4cl)
+    (let ((*package* (find-package :log4cl))
+          (foo (find-symbol (symbol-name '#:%fix-root-logger-check)
+                            (find-package :log4cl))))
+      (when foo
+        (funcall foo))))
+  (values))
 
 (defsystem :log4cl/syslog
   :version "1.1.3"
@@ -71,17 +81,7 @@
                              (:file "test-compat")
                              (:file "test-regressions")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :log4cl))))
-  (operate 'load-op :log4cl/test)
+(defmethod perform ((op test-op) (system (eql (find-system :log4cl/test))))
   (let ((*package* (find-package :log4cl-test)))
     (eval (read-from-string "(stefil:funcall-test-with-feedback-message 'log4cl-test::test)")))
-  (values))
-
-(defmethod perform :after ((op load-op) (system (eql (find-system :log4cl))))
-  (when (find-package :log4cl)
-    (let ((*package* (find-package :log4cl))
-          (foo (find-symbol (symbol-name '#:%fix-root-logger-check)
-                            (find-package :log4cl))))
-      (when foo
-        (funcall foo))))
   (values))
