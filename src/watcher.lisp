@@ -88,7 +88,8 @@
                       (error (e)
                         (log-error :logger logger "Error in hierarchy watcher thread:~%~A" e))))
                (with-hierarchies-lock
-                 #+ecl (bt:release-lock *stop-lock*)
+                 ;; lock might not have been acquired (i.e terminate-thread was called)
+                 #+ecl (ignore-errors (bt:release-lock *stop-lock*))
                  (setf *watcher-thread* nil))
                (%with-local-interrupts (log-info :logger logger "Hierarchy watcher thread ended"))))))
        :name "Hierarchy Watcher"
