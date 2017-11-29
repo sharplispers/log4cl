@@ -120,7 +120,7 @@ Without any options (LOG:CONFIG) displays current configuration
  :NOFILE       | :NOFILE does not show the file
 ---------------|---------------------------------------------------------------
  :THREAD       | Include thread name into default pattern, it will be after the
-  [<n>[<n2>]]  | time, in [%t] format. If :THERAD argument is followed by one
+  [<n>[<n2>]]  | time, in [%t] format. If :THREAD argument is followed by one
                | or two numbers, they will be used as min/max field width.
 ---------------|---------------------------------------------------------------
  :NDC          | Include NDC context into default pattern, with optional min/max
@@ -1238,14 +1238,15 @@ package.
     - :PRESERVE  :  Do not change
 
   Note that pattern layout offers similar facility that changes how
-  logger category is printed on the output side
+  logger category is printed on the output side.
 
 
-  SHORTEST-NICKNAME  - When T (default), the shortest of package name or
+  SHORTEST-NICKNAME - When T (default), the shortest of package name or
   any of its nicknames will be used as logger category, otherwise official
   package name will be used.
 
-  CATEGORY-SEPARATOR - String that separates logging categories, defaults to dot.
+  CATEGORY-SEPARATOR - String that separates logging categories,
+  defaults to dot.
 
   EXPR-PRINT-FORMAT - The FORMAT control string, for two arguments
   used to print expressions, first argument is quoted expression form,
@@ -1256,12 +1257,12 @@ package.
   EXPR-LOG-LEVEL - the log level for the (LOG:EXPR) macro. Default
   is :DEBUG.
 
-  OLD-LOGGING-MACROS - If set, log statement without constant format
+  OLD-LOGGING-MACROS - If set, log statements without constant format
   string such as (LOG:DEBUG a b c d) will be interpreted as logging to
   logger stored in variable A with format string B and more format
   arguments, instead of treating them as (LOG:EXPR a b c d)
   "
-  ;; Lambda list only for Slime-doc 
+  ;; Lambda list only for Slime-doc
   (declare (ignorable package category-case category-separator
                       expr-print-format shortest-nickname
                       expr-log-level

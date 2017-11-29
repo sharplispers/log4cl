@@ -145,7 +145,7 @@
   "Flushes all existing appenders, and stops watcher thread"
   (with-logged-problems (save-hook :flush-all-appenders)
     (flush-all-appenders))
-  (with-logged-problems (save-hook :flush-all-appenders)
+  (with-logged-problems (save-hook :save-all-appenders)
     (save-all-appenders))
   (with-logged-problems (save-hook :stop-hierarch-watcher-thread)
     (stop-hierarchy-watcher-thread)))

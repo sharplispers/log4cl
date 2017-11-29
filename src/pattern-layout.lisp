@@ -62,7 +62,7 @@ be known, (with-output-to-string) is used.
 Following pattern characters are recognized:
 
 --------------------------------------------------------------------
-   %p Log level string, for example DEBUG, INFO, TRACE. 
+   %p Log level string, for example DEBUG, INFO, TRACE.
 
    %P Log level string in lower case
 
@@ -90,7 +90,7 @@ Following pattern characters are recognized:
    {1}       | THREE
    {2}       | TWO:THREE
    {0,1}     | CL-USER
-   {5,1}     | 
+   {5,1}     |
    {1,1}     | ONE
    {1,2}     | ONE:TWO
    {1,0}     | ONE:TWO:THREE
@@ -111,7 +111,7 @@ Following pattern characters are recognized:
 --------------------------------------------------------------------
    %g - like to %c, but only portion of the categories that represent
    the package name
-   
+
    %C - like to %c, but only portion of the categories that are not
    the package name.
 
@@ -204,7 +204,7 @@ Following pattern characters are recognized:
    %_ conditional newline, issues (PPRINT-NEWLINE :linear)
    %:_ conditional newline, issues (PPRINT-NEWLINE :fill)
 
-   %[<n>]N does (PPRINT-INDENT :block n). 
+   %[<n>]N does (PPRINT-INDENT :block n).
    %:[<n>]N does (PPRINT-INDENT :current n).
 
    %<n1>.<n2>N is similar to above but the second argument of
@@ -368,7 +368,7 @@ Example: For the string {one}{}{three} will return the list (14
       (decf len (- len max)))
     (cond
       ((and (zerop len) (format-colon-flag info)))
-      ((< len min) 
+      ((< len min)
        (cond ((not (format-right-justify info))
               (when (format-prefix info)
                 (write-string (format-prefix info) stream))
@@ -387,19 +387,19 @@ Example: For the string {one}{}{three} will return the list (14
       (t
        (when (format-prefix info)
          (write-string (format-prefix info) stream))
-       (when (plusp len) 
+       (when (plusp len)
          (write-string string stream :start start :end end))
        (when (format-suffix info)
            (write-string (format-suffix info) stream)))))
-  (values)) 
+  (values))
 
-(define-pattern-formatter (#\p) 
+(define-pattern-formatter (#\p)
   "Output the %p (log level) pattern"
   (declare (ignore logger log-func))
   (format-string (log-level-to-string log-level) stream fmt-info)
   (values))
 
-(define-pattern-formatter (#\P) 
+(define-pattern-formatter (#\P)
   "Output the %P (log level) pattern"
   (declare (ignore logger log-func))
   (format-string (log-level-to-lc-string log-level) stream fmt-info)
@@ -431,7 +431,7 @@ unchanged"
 (defun kw= (arg what)
   (when (stringp arg)
     (when (plusp (length arg))
-      (when (char= #\: (char arg 0)) 
+      (when (char= #\: (char arg 0))
         (setq arg (substr arg 1))))
     (equalp arg what)))
 
@@ -510,7 +510,7 @@ unchanged"
   (parse-date-format-extra-args fmt-info nil pattern start))
 
 (defun format-categories (stream fmt-info cats num-cats separator)
-  (declare (type pattern-category-format-info fmt-info) 
+  (declare (type pattern-category-format-info fmt-info)
            (type stream stream)
            (type simple-vector cats)
            (type simple-string separator)
@@ -568,7 +568,7 @@ unchanged"
                                             (%logger-name-start-pos logger)
                                             (length (%logger-category logger))
                                             case)
-                   if (/= i end) 
+                   if (/= i end)
                    do (write-string-or-skip separator 0
                                             (length separator) nil))
              (when (format-suffix fmt-info)
@@ -583,7 +583,7 @@ unchanged"
   (values))
 
 (defun simple-format-catogories (stream fmt-info logger start-depth end-depth)
-  (declare (type pattern-category-format-info fmt-info) 
+  (declare (type pattern-category-format-info fmt-info)
            (type stream stream)
            (type logger logger)
            (type logger-cat-idx start-depth end-depth))
@@ -601,7 +601,7 @@ unchanged"
           ;; (format t "here1 start ~d end  ~d ~%" start-depth end-depth)
           )
         (if precision
-            (setq start-depth (max start-depth (- end-depth precision))))) 
+            (setq start-depth (max start-depth (- end-depth precision)))))
     (let ((start nil)
           (end nil)
           (cat (%logger-category logger)))
@@ -619,7 +619,7 @@ unchanged"
 (defmacro with-small-dynamic-extent-vector ((name len len-expr &optional (limit 32))
                                             &body body)
   (let ((foo (gensym)))
-    `(flet ((,foo (,name ,len) 
+    `(flet ((,foo (,name ,len)
               (declare (type simple-vector ,name)
                        (type fixnum ,len))
               ,@body))
@@ -637,7 +637,7 @@ unchanged"
 
 
 (defun format-categories-range (stream fmt-info logger start-depth end-depth)
-  (declare (type pattern-category-format-info fmt-info) 
+  (declare (type pattern-category-format-info fmt-info)
            (type stream stream)
            (type logger logger)
            (type logger-cat-idx start-depth end-depth))
@@ -648,7 +648,7 @@ unchanged"
             (cats num-cats (- end-depth start-depth))
           (declare (ignore num-cats))
           (let ((cnt 0))
-            (declare (type fixnum cnt)) 
+            (declare (type fixnum cnt))
             (loop with lgr = logger
                   for i fixnum downfrom (1- (logger-depth logger))
                   to start-depth
@@ -657,7 +657,7 @@ unchanged"
                        (when (< i end-depth)
                          (setf (svref cats cnt) lgr)
                          (incf cnt))
-                       (setf lgr (%logger-parent lgr)))) 
+                       (setf lgr (%logger-parent lgr))))
             (format-categories stream fmt-info cats cnt (or sep (%logger-category-separator logger)))))
         (simple-format-catogories stream fmt-info logger
                                   start-depth end-depth)))
@@ -682,15 +682,15 @@ unchanged"
   (declare (ignore log-level log-func))
   (let* ((start-depth (logger-pkg-idx-start logger))
          (end-depth (logger-pkg-idx-end logger)))
-    (cond ((zerop start-depth) 
-           (if (typep logger 'source-file-logger) 
+    (cond ((zerop start-depth)
+           (if (typep logger 'source-file-logger)
                (format-string "" stream fmt-info)
                ;; logger has no package info, format entire thing
                (format-categories-range stream fmt-info logger 0
                                         (logger-depth logger))))
           ((= 1 start-depth)
-           (if (typep logger 'source-file-logger) 
-               (format-string "" stream fmt-info) 
+           (if (typep logger 'source-file-logger)
+               (format-string "" stream fmt-info)
                ;; package is the prefix, so start from end of the package
                (format-categories-range stream fmt-info logger (1- end-depth)
                                         (logger-depth logger))))
@@ -704,7 +704,7 @@ unchanged"
                  (cats num-cats (- end-depth start-depth))
                (declare (ignore num-cats))
                (let ((cnt 0))
-                 (declare (type fixnum cnt)) 
+                 (declare (type fixnum cnt))
                  (loop with lgr = logger
                        for i fixnum downfrom (1- (logger-depth logger))
                        to 0
@@ -713,7 +713,7 @@ unchanged"
                             (unless (< (1- start-depth) i (1- end-depth))
                               (setf (svref cats cnt) lgr)
                               (incf cnt))
-                            (setf lgr (%logger-parent lgr)))) 
+                            (setf lgr (%logger-parent lgr))))
                  (format-categories stream fmt-info cats cnt
                                     (or sep (%logger-category-separator logger)))))))))
   (values))
@@ -730,7 +730,7 @@ unchanged"
 
 (define-pattern-formatter (#\F)
   (declare (ignore log-func log-level))
-  (let ((name (logger-file-namestring logger))) 
+  (let ((name (logger-file-namestring logger)))
     (format-string (or name "") stream fmt-info)))
 
 (define-pattern-formatter (#\m)
@@ -748,8 +748,7 @@ unchanged"
 (defun compile-pattern-format (pattern
                                &optional (idx 0)
                                          stopchar)
-  "Par
-ses the pattern format and returns a function with lambda-list
+  "Parses the pattern format and returns a function with lambda-list
 of (STREAM LOGGER LOG-LEVEL LOG-FUNC) that when called will output
 the log message to the stream with the specified format."
   (let ((str (make-array 0 :element-type 'character
@@ -805,12 +804,12 @@ the log message to the stream with the specified format."
                   (add-char c)
                   (setq state :normal))
                  (t (setq state :flag))))
-          (:flag 
+          (:flag
            (cond ((char= c #\:)
                   (setq colon-flag t)
                   (next-or-error "Expecting minimum length"))
-                 ((char= c #\@) 
-                  (setq at-flag t) 
+                 ((char= c #\@)
+                  (setq at-flag t)
                   (next-or-error "Expecting minimum length"))
                  ((char= c #\;)
                   (cond ((null prefix)
@@ -827,13 +826,13 @@ the log message to the stream with the specified format."
                          (next-or-error "Expecting suffix"))
                         (t (signal-error "Both prefix and suffix are already set"))))
                  (t (setq state :minus))))
-          (:prefix 
+          (:prefix
            (cond ((char/= c #\;)
                   (vector-push-extend c prefix)
                   (next-or-error "Runaway prefix"))
                  (t (setq state :flag)
                     (next-or-error "Expecting minimum length"))))
-          (:suffix 
+          (:suffix
            (cond ((char/= c #\;)
                   (vector-push-extend c suffix)
                   (next-or-error "Runaway suffix"))
@@ -882,7 +881,7 @@ the log message to the stream with the specified format."
                  (parse-extra-args fmt-info c pattern idx))
                (if (atom formatter) (add-formatter formatter fmt-info)
                    (destructuring-bind (formatter stopchar) formatter
-                     (multiple-value-bind (wrap newidx) 
+                     (multiple-value-bind (wrap newidx)
                          (compile-pattern-format pattern idx stopchar)
                        (setq idx newidx)
                        (add-formatter (lambda (stream fmt-info logger level log-func)
@@ -901,7 +900,7 @@ the log message to the stream with the specified format."
                               (- start-idx 2) stopchar)))
       (add-literal)
       (setq fm-list (nreverse fm-list))
-      (values 
+      (values
        (lambda (stream logger level log-func)
          (loop for (fm . fm-info) in fm-list
                do (funcall fm stream fm-info logger level log-func)))
@@ -1084,7 +1083,7 @@ strftime like PATTERN."))
                                tz))
                   (pad 5)
                   (format stream "~:[+~;-~]~2,'0d~2,'0d"
-                          (plusp tz-hours) (abs tz-hours) 
+                          (plusp tz-hours) (abs tz-hours)
                           (round (* 60 (coerce tz-mins 'float)))))))
              (setq flag-uppercase nil
                    flag-numeric-no-pad nil
@@ -1131,9 +1130,9 @@ strftime like PATTERN."))
 
 (define-pattern-formatter (#\x)
   (declare (ignore logger log-level log-func))
-  (if (boundp '*ndc-context*) 
+  (if (boundp '*ndc-context*)
       (let ((ndc *ndc-context*))
-        (cond 
+        (cond
           ((stringp ndc) (format-string ndc stream fmt-info))
           ;; Directly output he object without consing if
           ;; there is no padding or justification
@@ -1208,8 +1207,8 @@ package does not exist at runtime"
 
   (cond ((packagep *log-event-package-hint*)
          *log-event-package-hint*)
-        (t 
-         (or 
+        (t
+         (or
           (let* ((start-depth (logger-pkg-idx-start logger))
                  (end-depth (logger-pkg-idx-end logger)))
             (when (plusp start-depth)
@@ -1223,12 +1222,12 @@ package does not exist at runtime"
                 (loop while (> (logger-depth logger) start-depth)
                       do (progn
                            (decf start seplen)
-                           (when (>= (logger-depth logger) end-depth) 
+                           (when (>= (logger-depth logger) end-depth)
                              (setq end start))
                            (setq logger (%logger-parent logger))
                            (decf start (- (length (%logger-category logger))
                                           (%logger-name-start-pos logger)))))
-                (setq name 
+                (setq name
                       (if (and (zerop start)
                                (= end (length category)))
                           category (substr category start end)))
@@ -1286,24 +1285,24 @@ package does not exist at runtime"
 (define-pattern-formatter (#\< #\>)
   "Wrap content inside into PPRINT-LOGICAL-BLOCK"
   (flet ((doit (stream)
-           (case (format-package fmt-info) 
+           (case (format-package fmt-info)
              (:nopackage (let ((*package* (log-event-package logger)))
                            (funcall wrap stream logger log-level log-func)))
              (:package (let ((*package* (symbol-package :keyword)))
                          (funcall wrap stream logger log-level log-func)))
-             (t (funcall wrap stream logger log-level log-func))))) 
-    (let ((pretty (format-pretty fmt-info))) 
+             (t (funcall wrap stream logger log-level log-func)))))
+    (let ((pretty (format-pretty fmt-info)))
       (if (not (eq pretty :nopretty))
-          (progn 
+          (progn
             (pprint-logical-block (stream nil)
-              (if (eq pretty :pretty) 
+              (if (eq pretty :pretty)
                   (let* ((*print-pretty* t)
                          (margin (format-margin fmt-info)))
                     (if margin (let ((*print-right-margin*
                                        (if (eq margin :default) nil margin)))
                                  (doit stream))
                         (doit stream)))
-                  (doit stream)))) 
+                  (doit stream))))
           (let ((*print-pretty* nil)) (doit stream))))))
 
 (define-pattern-formatter (#\_)
@@ -1318,8 +1317,5 @@ package does not exist at runtime"
                  (n2 (format-max-len fmt-info)))
              (if (null n2) (if (format-right-justify fmt-info) (- n1) n1)
                  (+ n1 (* *log-indent*
-                          (if (format-right-justify fmt-info) (- n2) n2))))))) 
-    (pprint-indent (if (format-colon-flag fmt-info) :current :block) n stream))) 
-
-
-
+                          (if (format-right-justify fmt-info) (- n2) n2)))))))
+    (pprint-indent (if (format-colon-flag fmt-info) :current :block) n stream)))
