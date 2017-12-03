@@ -261,7 +261,7 @@ argument, the parent effective log level (string)")
     ;; I swear it something in slime-eval screws with point sometimes
     (save-excursion
       (let ((slime-current-thread t))
-        (slime-eval `(cl:ignore-errors ,form))))))
+        (sly-eval `(cl:ignore-errors ,form))))))
 
 (defvar log4slime-goto-definition-window nil
   "Passed as WHERE to `slime-pop-to-location', can be 'WINDOW or 'FRAME too")
@@ -509,8 +509,8 @@ default `add-log-current-defun-function' for CL code"
 defun loggers based on current Emacs context. Sets the
 log4slime-xxx-logger variables with returned info."
   (save-excursion
-    (when (slime-connected-p)
-      (let ((pkg (slime-current-package))
+    (when (sly-connected-p)
+      (let ((pkg (sly-current-package))
             (file (buffer-file-name))
             (current-defun (ignore-errors
                              (funcall (or log4slime-current-defun-function
@@ -813,13 +813,14 @@ to the first log statement"
         log4slime-defun-logger nil)
   args)
 
+
 (defun log4slime-check-connection (&optional from-mode)
   "Load the :log4slime system on inferior-lisp side"
   ;; weird, point in current buffer was moved on error, wondering what
   ;; is doing in?
   (save-excursion
-    (when (slime-connected-p)
-      (let* ((conn (slime-current-connection)))
+    (when (sly-connected-p)
+      (let* ((conn (sly-current-connection)))
         (when conn
           (let ((try (process-get conn 'log4slime-loaded)))
             (cond ((eq try t) t)
@@ -836,7 +837,7 @@ to the first log statement"
                                 (if from-mode 5 300))))
                    ;; mark it that we trying to do it
                    (process-put conn 'log4slime-loaded (float-time))
-                   (let* ((result (slime-eval
+                   (let* ((result (sly-eval
                                    `(cl:multiple-value-bind
                                      (ok err)
                                      (cl:ignore-errors
