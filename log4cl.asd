@@ -13,15 +13,11 @@
 ;;; See the License for the specific language governing permissions and
 ;;; limitations under the License.
 
-(defpackage :log4cl.system
-  (:use #:cl #:asdf))
-
-(in-package :log4cl.system)
-
-(defsystem :log4cl
+(asdf:defsystem "log4cl"
   :version "1.1.3"
-  :depends-on (:bordeaux-threads
-               #+sbcl :sb-posix)
+  :depends-on ("bordeaux-threads"
+               #+sbcl "sb-posix") ; for SB-POSIX:GETPID in pattern-layout.lisp
+
   :components
   ((module "src" :serial t
                  :components ((:file "impl-package")
@@ -44,30 +40,30 @@
                               (:file "property-parser")
                               (:file "property-configurator")
                               (:file "package"))))
-  :in-order-to ((test-op (test-op :log4cl/test))))
+  :in-order-to ((test-op (test-op "log4cl/test"))))
 
-(defmethod perform :after ((op load-op) (system (eql (find-system :log4cl))))
-  (when (find-package :log4cl)
-    (let ((*package* (find-package :log4cl))
-          (foo (find-symbol (symbol-name '#:%fix-root-logger-check)
-                            (find-package :log4cl))))
-      (when foo
-        (funcall foo))))
+(defmethod perform :after ((op load-op) (system (eql (find-system "log4cl"))))
+  (let ((package (find-package '#:log4cl)))
+    (when package
+      (let ((*package* package)
+            (foo (find-symbol (symbol-name '#:%fix-root-logger-check))))
+        (when foo
+          (funcall foo)))))
   (values))
 
-(defsystem :log4cl/syslog
+(asdf:defsystem "log4cl/syslog"
   :version "1.1.3"
-  :depends-on (:log4cl
-               #-sbcl :cl-syslog)
+  :depends-on ("log4cl"
+               #-sbcl "cl-syslog")
   :components ((:module "src"
                 :serial t
                 :components ((:file "syslog-appender")
                              #+sbcl (:file "syslog-appender-sbcl")
                              #-sbcl (:file "syslog-appender-cffi")))))
 
-(defsystem :log4cl/test
+(asdf:defsystem "log4cl/test"
   :version "1.1.3"
-  :depends-on (:log4cl :stefil)
+  :depends-on ("log4cl" "stefil")
   :components ((:module "tests"
                 :serial t
                 :components ((:file "test-defs")
