@@ -17,29 +17,43 @@
   :version "1.1.3"
   :depends-on ("bordeaux-threads"
                #+sbcl "sb-posix") ; for SB-POSIX:GETPID in pattern-layout.lisp
+  :components ((:module "src"
+                :serial t
+                :components ((:file "impl-package")
+                             (:file "defs")
+                             (:file "naming")
+                             #+sbcl (:file "naming-sbcl")
+                             #+ccl (:file "naming-ccl")
+                             (:file "hierarchy-base")
+                             (:file "hierarchy")
+                             (:file "logger")
+                             (:file "logging-macros")
+                             (:file "self-logger")))
+               (:module "appender"
+                :pathname "src/appender"
+                :depends-on ("src")
+                :serial t
+                :components ((:file "layout")
+                             (:file "simple-layout")
+                             (:file "pattern-layout")
 
-  :components
-  ((module "src" :serial t
-                 :components ((:file "impl-package")
-                              (:file "defs")
-                              (:file "naming")
-                              #+sbcl (:file "naming-sbcl")
-                              #+ccl (:file "naming-ccl")
-                              (:file "appender-base")
-                              (:file "hierarchy-base")
-                              (:file "hierarchy")
-                              (:file "logger")
-                              (:file "logging-macros")
-                              (:file "self-logger")
-                              (:file "layout")
-                              (:file "simple-layout")
-                              (:file "pattern-layout")
-                              (:file "appender")
-                              (:file "watcher")
-                              (:file "configurator")
-                              (:file "property-parser")
-                              (:file "property-configurator")
-                              (:file "package"))))
+                             (:file "appender-base")
+                             (:file "appender")))
+               (:module "configuration"
+                :pathname "src"
+                :depends-on ("src" "appender")
+                :serial t
+                :components ((:file "configurator")
+                             (:file "property-parser")
+                             (:file "property-configurator")))
+               (:module "watcher"
+                :pathname "src"
+                :depends-on ("src" "appender")
+                :components ((:file "watcher")))
+               (:module "client-package"
+                :pathname "src"
+                :depends-on ("src" "configuration")
+                :components ((:file "package"))))
   :in-order-to ((test-op (test-op "log4cl/test"))))
 
 (defmethod perform :after ((op load-op) (system (eql (find-system "log4cl"))))
