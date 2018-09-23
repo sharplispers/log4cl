@@ -68,6 +68,7 @@ opened."))
   (:documentation "Called from SAVE-HOOKS, must close appenders that
 own their stream in a such way, so its possible to reopen them"))
 
+
 (defgeneric appender-do-append (appender logger level log-func)
   (:documentation
    "Writes the log message into the appender. Text of the log message
@@ -137,7 +138,7 @@ Type                    | Description
 ------------------------|------------------------------------------------------
 NUMBER or :NUMBER       | Integer property, converted by (parse-integer)
 ------------------------|------------------------------------------------------
-BOOLEAN or :BOOLEAN     | Boolean, accepts \"true\" \"t\" \"on\" \"false\" 
+BOOLEAN or :BOOLEAN     | Boolean, accepts \"true\" \"t\" \"on\" \"false\"
                         | \"off\" \"nil\" and empty string
 ------------------------|------------------------------------------------------
 STRING or :STRING       | Value as-is after the equal sign in NAME = <value>
@@ -151,7 +152,7 @@ configurable from by property file configurator. See also
 PROPERTY-INITARG-FROM-STRING"))
 
 (defgeneric appender-do-flush (appender time)
-  (:documentation 
+  (:documentation
    "Perform any flushes of appender output if needed, marking the that
 output was performed at time TIME. This function can be called from
 any thread and should take care of serializing")

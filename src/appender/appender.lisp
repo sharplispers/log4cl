@@ -241,9 +241,8 @@ time of the flush with TIME"
          (all-appenders all-hierarchies))))
 
 (defun save-all-appenders (&optional (all-hierarchies t))
-  "Flush any appenders that had output since being flushed"
-  (map nil (lambda (x) (save-appender x))
-       (all-appenders all-hierarchies)))
+  "Save all appenders, that is, clean up all resources."
+  (map nil #'save-appender (all-appenders all-hierarchies)))
 
 (defmethod appender-do-append :around
     ((this serialized-appender) logger level log-func)
@@ -262,7 +261,7 @@ time of the flush with TIME"
 ;; Save one generic function dispatch by accessing STREAM slot directly
 (defmethod appender-do-append ((this fixed-stream-appender-base)
                                logger
-			       level
+                               level
                                log-func)
   (with-slots (layout stream %output-since-flush) this
     (layout-to-stream layout stream logger level log-func)

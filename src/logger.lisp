@@ -40,7 +40,7 @@
 ;; root logger
 (declaim (special *root-logger*)
          (type logger *root-logger*)
-	 (type fixnum *log-indent*)
+         (type fixnum *log-indent*)
          (inline is-enabled-for current-state
                  log-level-to-string
                  log-level-to-lc-string
@@ -92,10 +92,17 @@
   (state (map-into (make-array *hierarchy-max*) #'make-logger-state)
    :type (simple-array logger-state *)))
 
+(defun current-state (logger)
+  (svref (%logger-state logger) *hierarchy*))
+
 (defstruct (root-logger
             (:constructor %create-root-logger)
             (:include logger))
   (dummy nil))
+
+(declaim (inline logger-category logger-category-separator
+                 logger-name-start-pos logger-parent logger-child-hash
+                 logger-state))
 
 (defun logger-category (logger) (%logger-category logger))
 (defun logger-category-separator (logger) (%logger-category-separator logger))
@@ -103,10 +110,6 @@
 (defun logger-parent (logger) (%logger-parent logger))
 (defun logger-child-hash (logger) (%logger-child-hash logger))
 (defun logger-state (logger) (%logger-state logger))
-
-(declaim (inline logger-category logger-category-separator
-                 logger-name-start-pos logger-parent logger-child-hash
-                 logger-state))
 
 ;; Special logger representing the source file
 (defstruct (source-file-logger
@@ -476,9 +479,6 @@ which is a special type of leaf logger representing the source file."
                        (create-logger-from-parent logger)))))))))
 
 (setf (fdefinition 'get-logger-internal) (fdefinition '%get-logger))
-
-(defun current-state (logger)
-  (svref (%logger-state logger) *hierarchy*))
 
 (defun is-enabled-for (logger level)
   "Returns t if log level is enabled for the logger in the

@@ -663,12 +663,12 @@ unchanged"
                                   start-depth end-depth)))
   (values))
 
+(declaim (inline adjusted-logger-depth))
+
 (defun adjusted-logger-depth (logger)
   (if (typep logger 'source-file-logger)
       (1- (logger-depth logger))
       (logger-depth logger)))
-
-(declaim (inline adjusted-logger-depth))
 
 (define-pattern-formatter (#\c)
   "Format the %c (full log category) pattern"

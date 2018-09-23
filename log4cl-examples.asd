@@ -13,12 +13,8 @@
 ;;; See the License for the specific language governing permissions and
 ;;; limitations under the License.
 
-(asdf:defsystem #:log4cl-examples
-  :version "1.1.2"
-  :depends-on (#:log4cl #:swank)
-  :components ((:file "examples/naming-examples") 
+(asdf:defsystem "log4cl-examples"
+  :version "1.1.3"
+  :depends-on ("log4cl" "swank")
+  :components ((:file "examples/naming-examples")
                (:file "examples/customize-log-expr")))
-
-
-
-
