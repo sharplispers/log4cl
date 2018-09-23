@@ -18,22 +18,6 @@
 (defvar *watcher-thread-bindings* nil
   "Extra bindings for watcher thread")
 
-;; Not sure if this stuff is needed, but since we exit hierarchy
-;; watcher thread by asynchronous bt:destroy-thread, and SBCL provides
-;; support for it, no penalty in being extra careful
-
-(defmacro %without-interrupts (&body body)
-  #+sb-thread `(sb-sys:without-interrupts ,@body)
-  #-sb-thread`(progn ,@body))
-
-(defmacro %allow-with-interrupts (&body body)
-  #+sb-thread `(sb-sys:allow-with-interrupts ,@body)
-  #-sb-thread`(progn ,@body))
-
-(defmacro %with-local-interrupts (&body body)
-  #+sb-thread `(sb-sys:with-local-interrupts ,@body)
-  #-sb-thread`(progn ,@body))
-
 (defun call-with-logged-problems (context thunk)
   (handler-case (funcall thunk)
     (error (condition)
@@ -60,21 +44,18 @@
       (bordeaux-threads:make-thread
        (lambda ()
          ;; prevent two watcher threads from being started due to race
-         (%without-interrupts
-           (when (with-hierarchies-lock
-                   (cond (*watcher-thread*
-                          (%with-local-interrupts
-                            (log-debug "Watcher thread already started")
-                            nil))
-                         (t (setq *watcher-thread* (bt:current-thread)))))
-             (unwind-protect
-                  (%with-local-interrupts
-                    (handler-case
-                        (progn
-                          (log-info :logger logger "Hierarchy watcher started")
-                          (loop for *watcher-event-time* = (get-universal-time)
-                             do (hierarchy-watcher-once)
-                             until
+         (when (with-hierarchies-lock
+                 (cond (*watcher-thread*
+                        (log-debug "Watcher thread already started")
+                        nil)
+                       (t (setq *watcher-thread* (bt:current-thread)))))
+           (unwind-protect
+                (handler-case
+                    (progn
+                      (log-info :logger logger "Hierarchy watcher started")
+                      (loop for *watcher-event-time* = (get-universal-time)
+                            do (hierarchy-watcher-once)
+                            until
                                #-ecl ; timeout on cv signals error in ECL 16.1.3
                                (bt:with-lock-held (*stop-lock*)
                                  (bt:condition-wait *stop-cv* *stop-lock*
@@ -85,19 +66,18 @@
                                    (bt:with-timeout (*hierarchy-watcher-heartbeat*)
                                      (bt:acquire-lock *stop-lock*))
                                  (serious-condition () nil))))
-                      (error (e)
-                        (log-error :logger logger "Error in hierarchy watcher thread:~%~A" e))))
-               (with-hierarchies-lock
-                 ;; lock might not have been acquired (i.e terminate-thread was called)
-                 #+ecl (ignore-errors (bt:release-lock *stop-lock*))
-                 (setf *watcher-thread* nil))
-               (%with-local-interrupts (log-info :logger logger "Hierarchy watcher thread ended"))))))
+                  (error (e)
+                    (log-error :logger logger "Error in hierarchy watcher thread:~%~A" e)))
+             (with-hierarchies-lock
+               ;; lock might not have been acquired (i.e terminate-thread was called)
+               #+ecl (ignore-errors (bt:release-lock *stop-lock*))
+               (setf *watcher-thread* nil))
+             (log-info :logger logger "Hierarchy watcher thread ended"))))
        :name "Hierarchy Watcher"
        :initial-bindings
        `((*hierarchy* . 0)
-         (*package* . (find-package :log4cl-impl))
+         (*package* . (find-package '#:log4cl-impl))
          ,@*watcher-thread-bindings*)))))
-
 
 (defun hierarchy-watcher-do-one-token (hier token)
   (with-slots (name) hier
