@@ -69,7 +69,8 @@
   :version "1.1.3"
   :depends-on ("log4cl"
                #-sbcl "cl-syslog")
-  :components ((:module "src"
+  :components ((:module "appender"
+                :pathname "src/appender"
                 :serial t
                 :components ((:file "syslog-appender")
                              #+sbcl (:file "syslog-appender-sbcl")
