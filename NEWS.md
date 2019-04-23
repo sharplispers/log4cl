@@ -1,6 +1,7 @@
 ## 1.1.3 - Resuscitation
 
-* A syslog appender using cl-syslog has been added.
+* A syslog appender using either cl-syslog or SBCL's syslog support
+  has been added.
 
 * Fix for ABCL has been applied.
 
