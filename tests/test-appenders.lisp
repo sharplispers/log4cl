@@ -118,7 +118,7 @@ appended to it"
 
       (is (appender-enabled-p a1))
       (is (not (appender-enabled-p a2)))
-      
+
       (log-info :logger logger "info once more")
       (is (equal 4 (slot-value a1 'count)))
       (is (equal 3 (slot-value a2 'count)))
@@ -185,7 +185,7 @@ appended to it"
                 (is (equal 1 (appender-message-count a2)))
                 (is (equal 0 (appender-error-count a2)))
                 (is (equal 0 (appender-ignored-error-count a2)))
-                
+
                 ;; throws error, will be retried
                 (finishes (log-warn :logger logger "its a warning"))
 
@@ -225,7 +225,7 @@ appended to it"
                 (is (equal 1 (appender-message-count a2)))
                 (is (equal 0 (appender-error-count a2)))
                 (is (equal 0 (appender-ignored-error-count a2)))
-                
+
                 ;; throws error, will be retried
                 (finishes (log-warn :logger logger "its a warning"))
                 (is (appender-enabled-p a2))
@@ -264,7 +264,7 @@ forever loop."
                 (is (equal 1 (appender-message-count a2)))
                 ;; Throw error, with :retry always returned
                 (log-warn :logger logger "its a warning")
-                ;; 1 was there + 3 retries 
+                ;; 1 was there + 3 retries
                 (is (equal 4 (slot-value a2 'count)))
                 ;; none succeeded, and should have been auto disabled
                 (is (equal 1 (appender-message-count a2)))
@@ -285,7 +285,7 @@ forever loop."
            a2
            (output
              (with-output-to-string (s)
-               (with-output-to-string (ss) 
+               (with-output-to-string (ss)
                  (let* ((a1 (make-instance 'fixed-stream-appender :stream s))
                         (*debug-io* ss))
                    (setq a2 (make-instance 'temp-appender-test-class))
@@ -316,7 +316,7 @@ forever loop."
            a2
            (output
              (with-output-to-string (s)
-               (with-output-to-string (ss) 
+               (with-output-to-string (ss)
                  (let* ((a1 (make-instance 'fixed-stream-appender :stream s))
                         (*debug-io* ss))
                    (setq a2 (make-instance 'temp-appender-test-class))
@@ -356,7 +356,7 @@ user log statement, its raised and does not disable the appender"
         (is (equal 0 (appender-error-count a1)))
         (is (equal 1 count))
         ;; throws error doing append, which gets handled
-        (finishes (log-warn "hey")) 
+        (finishes (log-warn "hey"))
         (is (equal 2 count))
         (is (equal 1 (appender-error-count a1)))
         (setf (appender-enabled-p a1) t
@@ -486,7 +486,7 @@ user log statement, its raised and does not disable the appender"
         ;; verify it did not flush, (this will fail on non-threaded lisp
         ;; so only do it if its threaded lisp, and therefore immediate-flush
         ;; defaulted to NIL
-        ;; Under CCL the flusher thread sometimes manages to race us 
+        ;; Under CCL the flusher thread sometimes manages to race us
         ;; (unless (slot-value a 'log4cl::immediate-flush)
         ;;   (with-open-file (s fname)
         ;;     (is (read-line s nil))
@@ -511,9 +511,9 @@ based on the file modification time"
            (a1 (make-instance 'daily-file-appender
                 :name-format fname
                 :backup-name-format (format nil "~a-%H-%M-%S.log" fname)
-                ::rollover-check-period 1))
+                :rollover-check-period 1))
    (logger (make-logger '(one two three))))
-      ;; create 
+      ;; create
       (with-open-file (s fname :direction :output :if-does-not-exist :create :if-exists :supersede)
         (format s "First line~%"))
       ;; test its there
@@ -555,7 +555,7 @@ the log file initially, make test for the new problem"
              (when (and (search "open" (format nil "~a" c)
                                 :test 'equalp)
                         (find-restart 'continue))
-               (invoke-restart 'continue))))) 
+               (invoke-restart 'continue)))))
       (let* ((fname (merge-pathnames (rand-filename) *tests-dir*))
              ;; fixed name, and formatted backup
              (bak-name (make-pathname :defaults fname :type "bak"))
@@ -563,9 +563,9 @@ the log file initially, make test for the new problem"
                   :name-format fname
                   ;; :backup-name-format (format nil "~a-%H-%M-%S.log" fname)
                   :backup-name-format (format nil "~a.bak" fname)
-                  ::rollover-check-period 1))
+                  :rollover-check-period 1))
              (logger (make-logger '(one two three))))
-        ;; create 
+        ;; create
         (with-open-file (s fname :direction :output :if-does-not-exist :create :if-exists :supersede)
           (format s "First line~%"))
         ;; test its there
@@ -587,7 +587,7 @@ the log file initially, make test for the new problem"
           (is (equal (read-line s) "INFO - Hey")))))))
 
 (deftest test-flush-all-appenders ()
-  (with-package-log-hierarchy 
+  (with-package-log-hierarchy
     (clear-logging-configuration)
     (let* ((logger (make-logger '(one two three)))
            a
