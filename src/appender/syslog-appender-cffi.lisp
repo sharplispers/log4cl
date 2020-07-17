@@ -26,5 +26,5 @@
       (:error :err)
       (:warn  :warning)
       (:info  :info)
-      ((:debu1 :debu2 :debu3 :debu4 :debu5 :debu6 :debu7 :debu8 :debu9)
+      ((:debug :debu1 :debu2 :debu3 :debu4 :debu5 :debu6 :debu7 :debu8 :debu9)
        :debug))))
