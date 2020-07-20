@@ -49,8 +49,8 @@ figure it out
                ((search "DEFUN" repr) 'defun)
                ((search "FUNCTION" repr) 'defun))))))
 
-(defun slime-loc-defun-p (loc) (eq (slime-loc-type loc) 'swank-backend::defun))
-(defun slime-loc-defvar-p (loc) (eq (slime-loc-type loc) 'swank-backend::defvar))
+;; (defun slime-loc-defun-p (loc) (eq (slime-loc-type loc) 'swank-backend::defun))
+;; (defun slime-loc-defvar-p (loc) (eq (slime-loc-type loc) 'swank-backend::defvar))
 
 (defun find-best-location-match (categories definitions)
   "User had left-clicked on a log message coming list of CATEGORIES
@@ -131,9 +131,9 @@ be split into multiple ones, but I have no time right now"
                         (defs (when cats 
                                 (if (and (eq (first cats) 'setf)
                                          (second cats))
-                                    (swank::find-definitions (subseq cats 0 2))
-                                    (swank::find-definitions (first cats))))))
-                   (mapcar #'swank::xref>elisp (find-best-location-match cats defs))))
+                                    (slynk::find-definitions (subseq cats 0 2))
+                                    (slynk::find-definitions (first cats))))))
+                   (mapcar #'slynk::xref>elisp (find-best-location-match cats defs))))
                (logger-name-for-emacs (logger)
                  (format nil "Category ~a" (logger-category logger)))
                (children-level-count (logger)
@@ -201,7 +201,7 @@ be split into multiple ones, but I have no time right now"
                                  (or (find-package package)
                                      (find-package (string-upcase package))
                                      (find-package (string-downcase package))
-                                     (swank::parse-package package)
+                                     (slynk::parse-package package)
                                      (let* ((str (ignore-errors
                                                   (string (read-from-string package)))))
                                        (when str 
@@ -210,7 +210,7 @@ be split into multiple ones, but I have no time right now"
                                              (find-package (string-downcase str)))))))))
                      (log:expr pkg)
                      (when (or pkg (not package)) 
-                       (swank::with-buffer-syntax (pkg)
+                       (slynk::with-buffer-syntax (pkg)
                          (with-package-naming-configuration (*package*) 
                            (find-package-categories)
                            (multiple-value-bind (logger display-name) (find-logger) 
@@ -252,21 +252,21 @@ be split into multiple ones, but I have no time right now"
 ;; Support for snippets compiled via C-c C-c correctly identifying the source file
 ;; 
 (defvar *old-compile-string-for-emacs*
-  (fdefinition 'swank::compile-string-for-emacs))
+  (fdefinition 'slynk::compile-string-for-emacs))
 
 ;; Patch the COMPILE-STRING-FOR-EMACS to bind *LOGGER-TRUENAME* to the file
 ;; name that C-c C-c snippet is from
-(setf (fdefinition 'swank::compile-string-for-emacs)
+(setf (fdefinition 'slynk::compile-string-for-emacs)
       (lambda (string buffer position filename policy)
         (let ((*logger-truename*
                 (when filename (ignore-errors (parse-namestring filename)))))
           (funcall *old-compile-string-for-emacs*
                    string buffer position filename policy))))
 
-;; In case SWANK was patched with the "thread stopper" patch that defines
+;; In case SLYNK was patched with the "thread stopper" patch that defines
 ;; protocol for starting/stopping threads around calls to fork(), register
 ;; a callback for the watcher thread
-(let ((rss-foo (find-symbol (symbol-name '#:register-thread-stopper) (find-package :swank))))
+(let ((rss-foo (find-symbol (symbol-name '#:register-thread-stopper) (find-package :slynk))))
   (and rss-foo (funcall rss-foo :log4cl #'log4cl::start/stop-watcher-hook)))
 ;;
 ;; Some copy-paste from CLHS package
