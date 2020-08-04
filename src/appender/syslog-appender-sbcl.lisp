@@ -12,12 +12,14 @@
          (message
            (with-output-to-string (stream)
              (layout-to-stream layout stream logger level log-func))))
-    (sb-posix:openlog (syslog-appender-name appender)
-                      (logior sb-posix:log-user
-                              (if (syslog-appender-include-pid? appender)
-                                  sb-posix:log-pid 0)))
-    (sb-posix:syslog syslog-level "~A" message)
-    (sb-posix:closelog)))
+    (unwind-protect
+      (progn
+        (sb-posix:openlog (syslog-appender-name appender)
+                          (logior sb-posix:log-user
+                                  (if (syslog-appender-include-pid? appender)
+                                      sb-posix:log-pid 0)))
+        (sb-posix:syslog syslog-level "~A" message))
+      (sb-posix:closelog))))
 
 ;; Utility functions
 

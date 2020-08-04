@@ -7,7 +7,7 @@
 
 (in-package #:log4cl)
 
-(defclass syslog-appender (appender)
+(defclass syslog-appender (serialized-appender)
   ((name :initarg :name :type string
          :accessor syslog-appender-name)
    (include-pid? :initarg :include-pid? :type boolean
