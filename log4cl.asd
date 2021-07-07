@@ -68,29 +68,30 @@
 (asdf:defsystem "log4cl/syslog"
   :version "1.1.3"
   :depends-on ("log4cl"
-               #-sbcl "cl-syslog")
+               #-(or sbcl allegro) "cl-syslog")
   :components ((:module "appender"
-                :pathname "src/appender"
-                :serial t
-                :components ((:file "syslog-appender")
-                             #+sbcl (:file "syslog-appender-sbcl")
-                             #-sbcl (:file "syslog-appender-cffi")))))
+		:pathname "src/appender"
+		:serial t
+		:components ((:file "syslog-appender")
+			     #+sbcl (:file "syslog-appender-sbcl")
+			     #+allegro (:file "syslog-appender-allegro")
+			     #-(or sbcl allegro) (:file "syslog-appender-cffi")))))
 
 (asdf:defsystem "log4cl/test"
   :version "1.1.3"
   :depends-on ("log4cl" "stefil")
   :components ((:module "tests"
-                :serial t
-                :components ((:file "test-defs")
-                             (:file "test-logger")
-                             (:file "test-category-separator")
-                             (:file "test-layouts")
-                             (:file "test-appenders")
-                             (:file "test-configurator")
-                             (:file "test-speed")
-                             (:file "test-file-category")
-                             (:file "test-compat")
-                             (:file "test-regressions")))))
+		:serial t
+		:components ((:file "test-defs")
+			     (:file "test-logger")
+			     (:file "test-category-separator")
+			     (:file "test-layouts")
+			     (:file "test-appenders")
+			     (:file "test-configurator")
+			     (:file "test-speed")
+			     (:file "test-file-category")
+			     (:file "test-compat")
+			     (:file "test-regressions")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :log4cl/test))))
   (let ((*package* (find-package :log4cl-test)))
